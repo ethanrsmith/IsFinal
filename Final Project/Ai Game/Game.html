@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Country Hangman Game</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 {
+            color: #333;
+        }
+        .word {
+            font-size: 30px;
+            letter-spacing: 10px;
+            margin: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        .letters button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            color: white;
+            background-color: #007bff;
+            width: 40px;
+            height: 40px;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .letters button:hover {
+            background-color: #0056b3;
+            transform: scale(1.1);
+        }
+        .status {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #007bff;
+        }
+        .score {
+            font-size: 24px;
+            color: #333;
+            margin-top: 20px;
+        }
+        .letter-row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Country Hangman Game</h1>
+    <div class="word" id="word">_ _ _ _ _</div>
+    <div class="letters" id="letters"></div>
+    <div class="status" id="status">Attempts Left: 6</div>
+    <div class="score" id="score">Score: 0</div>
+
+    <script>
+        const countries = [
+            "CANADA", "BRAZIL", "INDIA", "JAPAN", "FRANCE", "EGYPT", "GERMANY", "CHILE", "KENYA", "ITALY",
+            "AUSTRALIA", "MEXICO", "SPAIN", "ARGENTINA", "UNITEDKINGDOM", "UNITEDSTATES", "RUSSIA", "CHINA", "SOUTHAFRICA", "SINGAPORE"
+        ];
+        
+        let selectedWord = "";
+        let displayWord = [];
+        let attemptsLeft = 6;
+        let score = 0;
+
+        function initializeGame() {
+            // Only reset attempts for a new game, not the score
+            attemptsLeft = 6;
+            document.getElementById('status').textContent = `Attempts Left: ${attemptsLeft}`;
+            
+            selectedWord = countries[Math.floor(Math.random() * countries.length)];
+            displayWord = Array(selectedWord.length).fill('_');
+            document.getElementById('word').textContent = displayWord.join(' ');
+            createLetterButtons();
+        }
+
+        function createLetterButtons() {
+            const lettersElement = document.getElementById('letters');
+            lettersElement.innerHTML = '';
+
+            const rows = [
+                "QWERTYUIOP",
+                "ASDFGHJKL",
+                "ZXCVBNM"
+            ];
+
+            rows.forEach(row => {
+                const rowDiv = document.createElement('div');
+                rowDiv.classList.add('letter-row');
+                row.split('').forEach(letter => {
+                    const button = document.createElement('button');
+                    button.textContent = letter;
+                    button.onclick = () => handleGuess(letter, button);
+                    rowDiv.appendChild(button);
+                });
+                lettersElement.appendChild(rowDiv);
+            });
+        }
+
+        function handleGuess(letter, button) {
+            button.disabled = true;
+            if (selectedWord.includes(letter)) {
+                button.style.backgroundColor = "green";
+                setTimeout(() => {
+                    selectedWord.split('').forEach((char, index) => {
+                        if (char === letter) {
+                            displayWord[index] = letter;
+                        }
+                    });
+                    document.getElementById('word').textContent = displayWord.join(' ');
+                    checkWin();
+                }, 300);
+            } else {
+                button.style.backgroundColor = "red";
+                attemptsLeft--;
+                document.getElementById('status').textContent = `Attempts Left: ${attemptsLeft}`;
+                checkLoss();
+            }
+        }
+
+        function checkWin() {
+            if (!displayWord.includes('_')) {
+                score++;  // Increase score for correct guess
+                document.getElementById('score').textContent = `Score: ${score}`;
+                setTimeout(() => {
+                    alert('Congratulations! You guessed the country!');
+                    initializeGame();  // Start a new game after winning
+                }, 300);
+            }
+        }
+
+        function checkLoss() {
+            if (attemptsLeft <= 0) {
+                document.getElementById('word').textContent = selectedWord;
+                setTimeout(() => {
+                    alert(`Game Over! The correct answer was ${selectedWord}.`);
+                    score = 0;  // Reset score when the player loses
+                    document.getElementById('score').textContent = `Score: ${score}`;
+                    initializeGame();  // Start a new game after losing
+                }, 300);
+            }
+        }
+
+        initializeGame();  // Start the first game
+    </script>
+</body>
+</html>
